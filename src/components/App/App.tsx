@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import css from "./App.module.css";
 
 import ReactPaginateModule from "react-paginate";
@@ -29,12 +29,18 @@ function App() {
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies({ query, page }),
     enabled: query !== "",
     placeholderData: keepPreviousData,
   });
+
+  useEffect(() => {
+  if (isSuccess && data?.results?.length === 0) {
+    toast.error("No movies found for your request");
+  }
+}, [isSuccess, data?.results]);
 
   const totalPages = data?.total_pages ?? 0;
 
